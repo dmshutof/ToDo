@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './assets/scss/index.scss';
 import './assets/scss/reset.css';
+import './assets/scss/index.scss';
+import './assets/scss/media.scss';
+
 import App from './App';
 import {createStore, compose, applyMiddleware} from 'redux'
 import {Provider} from 'react-redux'

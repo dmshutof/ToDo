@@ -3,10 +3,13 @@ import TaskForm from "./TaskForm/TaskForm";
 import axios from "axios";
 import {GetTasks} from "../../store/actions/ActionValue";
 import {connect} from "react-redux";
+import SidebarForm from "./SidebarForm/SidebarForm";
 
 function AddButton(props) {
     const [formShow, setFormShow] = useState(false);
     const [inputText, SetInputText] = useState(null);
+    const [inputFolderName, SetInputFolderName] = useState(null);
+    const [radioColor, SetRadioColor] = useState('gray');
 
     const ShowAddForm = ()=>{
         setFormShow(true)
@@ -16,32 +19,88 @@ function AddButton(props) {
         e.preventDefault()
         let parentId = props.parentId
 
-        axios({
-            method:'post',
-            url: 'https://todo-36f9b.firebaseio.com/todos/' + parentId+ '/taskList.json',
-            data:{
-                checked: false,
-                name: inputText,
-                task_id: Math.floor(Math.random() * (999 - 1) + 1)
-            }
-        }).then(res => {
-            props.GetTasks()
+       if (!!inputText){
+           axios({
+               method:'post',
+               url: 'https://todo-36f9b.firebaseio.com/todos/' + parentId+ '/taskList.json',
+               data:{
+                   checked: false,
+                   name: inputText,
+                   task_id: Math.floor(Math.random() * (999 - 1) + 1)
+               }
+           }).then(res => {
+               props.GetTasks()
 
-        }).then(res => {
-           setTimeout(()=>{
-               props.taskToState()
-           },5000)
-            setFormShow(false)
-            SetInputText(null)
+           }).then(res => {
+               setFormShow(false)
+               SetInputText(null)
 
-        }).catch( function(error) {
-            console.log(error);
-        });
+           }).catch( function(error) {
+               console.log(error);
+           });
+       } else{
+
+           document.querySelector('.add_form .main_input').classList.add('error')
+
+           if (document.querySelector('.add_form .main_input').classList.contains('error')){
+               document.querySelector('.add_form .main_input').classList.remove('error')
+               setTimeout(()=>{
+                   document.querySelector('.add_form .main_input').classList.add('error')
+               },100)
+           }
+       }
 
 
     }
 
-    const Сancel = (e)=>{
+    const addFolder = (e)=>{
+        e.preventDefault()
+
+        if (!!inputFolderName){
+            axios({
+                method:'post',
+                url: 'https://todo-36f9b.firebaseio.com/todos.json',
+                data:{
+                    colorClass: radioColor,
+                    title: inputFolderName,
+                    id: Math.floor(Math.random() * (999 - 1) + 1),
+                    position: 2,
+                    taskList:[
+                        {
+                            fake: 'qqw'
+                        }
+                    ]
+                }
+            }).then(res => {
+                props.GetTasks()
+
+            }).then(res => {
+                setFormShow(false)
+                SetInputFolderName(null)
+
+            }).catch( function(error) {
+                console.log(error);
+            });
+        } else{
+
+            document.querySelector('.sidebar_form .main_input').classList.add('error')
+
+            if (document.querySelector('.sidebar_form .main_input').classList.contains('error')){
+                document.querySelector('.sidebar_form .main_input').classList.remove('error')
+                setTimeout(()=>{
+                    document.querySelector('.sidebar_form .main_input').classList.add('error')
+                },100)
+            }
+        }
+
+
+    }
+
+
+
+
+
+    const Cancel = (e)=>{
         e.preventDefault()
         setFormShow(false)
     }
@@ -49,7 +108,13 @@ function AddButton(props) {
     const changeInputText = (e)=>{
         SetInputText(e.target.value)
     }
+    const changeInputFolderName = (e)=>{
+        SetInputFolderName(e.target.value)
+    }
 
+    const changeRadioColor = (e)=>{
+        SetRadioColor(e.target.value)
+    }
 
     return (
         <div className="add_button_wrap">
@@ -82,14 +147,19 @@ function AddButton(props) {
                         formShow?
                         <TaskForm
                             addTask={AddTask}
-                            cancel={Сancel}
+                            cancel={Cancel}
                             changeInputText={changeInputText}
                         />
                         : null
 
                 :
                         formShow?
-                            'SidebarForm'
+                            <SidebarForm
+                                addFolder={addFolder}
+                                changeInputFolderName={changeInputFolderName}
+                                cancel={Cancel}
+                                changeRadioColor={changeRadioColor}
+                            />
                         : null
             }
         </div>
